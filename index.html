@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>mero app</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #f8f9fa;
+    }
+
+    .top-bar {
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      color: white;
+      padding: 12px 16px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .app-title {
+      flex: 1;
+      text-align: center;
+      font-family: 'Trebuchet MS', sans-serif;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      margin: 0;
+    }
+
+    .menu-toggle {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .menu-toggle:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .menu-toggle i {
+      font-size: 1.2rem;
+    }
+
+    .content-area {
+      flex: 1;
+      padding: 0;
+      overflow-y: auto;
+      background-color: #ffffff;
+    }
+
+    /* Modern Bottom Navigation */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      box-shadow: 0 -2px 20px rgba(0,0,0,0.1);
+      z-index: 1000;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      margin: 0 10px 10px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 0;
+      min-width: 80px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s;
+    }
+
+    .nav-item.active {
+      transform: translateY(-8px);
+    }
+
+    .nav-icon {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+      transition: color 0.2s;
+    }
+
+    .nav-text {
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .nav-item:not(.active) .nav-icon,
+    .nav-item:not(.active) .nav-text {
+      color: #868e96;
+    }
+
+    .nav-item.active .nav-icon,
+    .nav-item.active .nav-text {
+      color: #1a73e8;
+    }
+
+    /* Active indicator */
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      width: 32px;
+      height: 6px;
+      background: #1a73e8;
+      border-radius: 3px;
+      box-shadow: 0 2px 6px rgba(26, 115, 232, 0.4);
+    }
+
+    .time-display {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #495057;
+      font-weight: 500;
+      padding: 0 16px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 280px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #0d47a1, #1a73e8);
+      color: white;
+      z-index: 2000;
+      transition: left 0.3s ease;
+      box-shadow: 3px 0 15px rgba(0,0,0,0.2);
+      overflow-y: auto;
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-header h5 {
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar-menu li {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Collapsible Section */
+    .section-header {
+      padding: 14px 20px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: none;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.2s;
+    }
+
+    .section-header:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .section-header i {
+      transition: transform 0.3s ease;
+    }
+
+    .section-header.collapsed i {
+      transform: rotate(-90deg);
+    }
+
+    .section-content {
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+    }
+
+    .section-content.hidden {
+      max-height: 0 !important;
+      opacity: 0;
+      visibility: hidden;
+      padding: 0 20px;
+    }
+
+    .sidebar-menu a {
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      padding: 14px 20px;
+      display: block;
+      font-size: 1.05rem;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+    }
+
+    .sidebar-menu a:hover {
+      background: rgba(255,255,255,0.15);
+      color: white;
+    }
+
+    .sidebar-menu i {
+      margin-right: 12px;
+      font-size: 1.2rem;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1500;
+      display: none;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Overlay for sidebar -->
+  <div class="overlay" id="sidebarOverlay"></div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="appSidebar">
+    <div class="sidebar-header">
+      <h5>Navigation Menu</h5>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#" data-page="home"><i class="bi bi-house-door"></i> Home</a></li>
+      <li><a href="#" data-page="profile"><i class="bi bi-person"></i> My Profile</a></li>
+      <li><a href="#" data-page="settings"><i class="bi bi-gear"></i> Settings</a></li>
+      <li><a href="#" data-page="about"><i class="bi bi-info-circle"></i> About App</a></li>
+      <li><a href="#" data-page="contact"><i class="bi bi-envelope"></i> Contact Us</a></li>
+      
+      <!-- Collapsible Link Section -->
+      <li>
+        <div class="section-header" id="linkSectionToggle">
+          Link
+          <i class="bi bi-chevron-down"></i>
+        </div>
+        <div class="section-content" id="linkSectionContent">
+          <a href="#" data-page="websitelibrary"><i class="bi bi-collection"></i> Website Library</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="app-container">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <button class="menu-toggle" id="menuToggle">
+        <i class="bi bi-list"></i>
+      </button>
+      <h1 class="app-title">mero app</h1>
+    </div>
+
+    <!-- Live Time -->
+    <div class="time-display" id="nepal-time">
+      Loading time...
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area" id="main-content">
+      <div class="container mt-4">
+        <h4>Welcome to mero app</h4>
+        <p>Tap "tools", "calendar", or "My Documents" below to explore.</p>
+      </div>
+    </div>
+
+    <!-- Modern Bottom Navigation -->
+    <div class="bottom-bar">
+      <div class="nav-item active" data-page="tools">
+        <i class="bi bi-tools nav-icon"></i>
+        <span class="nav-text">Tools</span>
+      </div>
+      <div class="nav-item" data-page="calendar">
+        <i class="bi bi-calendar nav-icon"></i>
+        <span class="nav-text">Calendar</span>
+      </div>
+      <div class="nav-item" data-page="documents">
+        <i class="bi bi-file-earmark-text nav-icon"></i>
+        <span class="nav-text">Documents</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS + Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Update Nepal time every second
+    function updateNepalTime() {
+      const options = {
+        timeZone: 'Asia/Kathmandu',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        weekday: 'short'
+      };
+      const formatter = new Intl.DateTimeFormat('en-US', options);
+      document.getElementById('nepal-time').textContent = formatter.format(new Date());
+    }
+
+    setInterval(updateNepalTime, 1000);
+    updateNepalTime(); // Initial call
+
+    // Sidebar functionality
+    const sidebar = document.getElementById('appSidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.add('open');
+      overlay.classList.add('active');
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    });
+
+    // Collapsible section logic
+    const linkSectionToggle = document.getElementById('linkSectionToggle');
+    const linkSectionContent = document.getElementById('linkSectionContent');
+    
+    // Initialize as collapsed
+    linkSectionContent.classList.add('hidden');
+    linkSectionToggle.classList.add('collapsed');
+    
+    linkSectionToggle.addEventListener('click', () => {
+      linkSectionContent.classList.toggle('hidden');
+      linkSectionToggle.classList.toggle('collapsed');
+    });
+
+    // Handle sidebar navigation
+    document.querySelectorAll('.sidebar-menu a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const page = this.getAttribute('data-page');
+        loadContent(page);
+        
+        // Close sidebar
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+      });
+    });
+
+    // Handle bottom navigation clicks
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', function() {
+        // Remove active class from all
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        // Add active to clicked
+        this.classList.add('active');
+
+        const page = this.getAttribute('data-page');
+        loadContent(page);
+      });
+    });
+
+    // Content loader function
+    function loadContent(page) {
+      const content = document.getElementById('main-content');
+      
+      switch(page) {
+        case 'tools':
+          content.innerHTML = `<iframe src="https://maharjanil.github.io/tools/"></iframe>`;
+          break;
+          
+        case 'calendar':
+          content.innerHTML = `
+            <div class="container mt-4">
+              <h4 class="mb-3">📅 Calendar</h4>
+              <p>Today's events:</p>
+              <div class="alert alert-info mt-3">
+                No events scheduled.
+              </div>
+              <button class="btn btn-primary mt-2">+ Add Event</button>
+            </div>
+          `;
+          break;
+          
+        case 'documents':
+          content.innerHTML = `<iframe src="https://maharjanil.github.io/documents/"></iframe>`;
+          break;
+          
+        case 'websitelibrary':
+          content.innerHTML = `<iframe src="https://maharjanil.github.io/websitelibrary/"></iframe>`;
+          break;
+          
+        case 'home':
+          content.innerHTML = `
+            <div class="container mt-4">
+              <h4 class="mb-3">🏠 Home</h4>
+              <p>Welcome back! This is your main dashboard.</p>
+              <div class="card mt-3">
+                <div class="card-body">
+                  <h6>Quick Stats</h6>
+                  <p>You have 3 pending tasks</p>
+                </div>
+              </div>
+            </div>
+          `;
+          break;
+          
+        case 'profile':
+          content.innerHTML = `
+            <div class="container mt-4">
+              <h4 class="mb-3">👤 My Profile</h4>
+              <div class="text-center">
+                <div class="bg-light rounded-circle mx-auto mb-3" style="width:120px;height:120px;display:flex;align-items:center;justify-content:center;">
+                  <span class="display-4">A</span>
+                </div>
+                <h5>Anil Maharjan</h5>
+                <p class="text-muted">User since 2023</p>
+              </div>
+            </div>
+          `;
+          break;
+          
+        case 'settings':
+          content.innerHTML = `
+            <div class="container mt-4">
+              <h4 class="mb-3">⚙️ Settings</h4>
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Theme
+                  <span class="badge bg-primary rounded-pill">Light</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Notifications
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" checked>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          break;
+          
+        case 'about':
+          content.innerHTML = `
+            <div class="container mt-4">
+              <h4 class="mb-3">ℹ️ About App</h4>
+              <p>This is a demo mobile application built with HTML, CSS, JavaScript, and Bootstrap 5.</p>
+              <p class="text-muted">Version 1.0.0</p>
+            </div>
+          `;
+          break;
+          
+        case 'contact':
+          content.innerHTML = `
+            <div class="container mt-4">
+              <h4 class="mb-3">✉️ Contact Us</h4>
+              <form>
+                <div class="mb-3">
+                  <label class="form-label">Your Message</label>
+                  <textarea class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+              </form>
+            </div>
+          `;
+          break;
+          
+        default:
+          content.innerHTML = `
+            <div class="container mt-4">
+              <h4>Welcome to mero app</h4>
+              <p>Select an option from the menu.</p>
+            </div>
+          `;
+      }
+    }
+  </script>
+</body>
+</html>
