@@ -1,539 +1,704 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="html-root">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>mero app</title>
-  <!-- Bootstrap 5 CSS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Mero App</title>
+  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <style>
-    body, html {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      overflow-x: hidden;
+    :root {
+      --mero-blue: #2563eb;
+      --mero-blue-light: #dbeafe;
+      --mero-blue-dark: #1d4ed8;
+      --surface: #ffffff;
+      --on-surface: #1e293b;
+      --surface-container: #f8fafc;
+      --outline: #cbd5e1;
+      --shadow: rgba(0,0,0,0.08);
     }
 
-    .app-container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      background-color: #f8f9fa;
+    [data-theme="dark"] {
+      --mero-blue: #60a5fa;
+      --mero-blue-light: #1e293b;
+      --mero-blue-dark: #93c5fd;
+      --surface: #0f172a;
+      --on-surface: #f1f5f9;
+      --surface-container: #1e293b;
+      --outline: #475569;
+      --shadow: rgba(0,0,0,0.25);
     }
 
-    .top-bar {
-      background: linear-gradient(135deg, #1a73e8, #0d47a1);
-      color: white;
-      padding: 12px 16px;
-      font-size: 1.5rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--surface-container);
+      color: var(--on-surface);
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      padding-bottom: 20px;
+    }
+
+    /* ===== LOGIN MODAL ===== */
+    #login-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
       z-index: 1000;
-      display: flex;
+      justify-content: center;
       align-items: center;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 32px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .login-card h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: var(--mero-blue-dark);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--outline);
+      border-radius: 12px;
+      background: var(--surface-container);
+      color: var(--on-surface);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 12px;
+      background: var(--mero-blue);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+
+    .btn-google {
+      background: #4285F4;
+      margin-top: 12px;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 20px 0;
+      color: var(--outline);
       position: relative;
     }
 
-    .app-title {
-      flex: 1;
-      text-align: center;
-      font-family: 'Trebuchet MS', sans-serif;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-      margin: 0;
+    .divider::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--outline);
+      z-index: 0;
     }
 
-    .menu-toggle {
+    .divider span {
+      background: var(--surface);
+      padding: 0 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ===== APP UI ===== */
+    .app-bar {
+      background: var(--mero-blue);
+      color: white;
+      padding: 24px 16px 16px;
+      border-radius: 0 0 28px 28px;
+      margin: 0 16px 24px;
+      box-shadow: 0 4px 12px var(--shadow);
+      position: relative;
+      z-index: 10;
+    }
+
+    .avatar {
+      width: 56px;
+      height: 56px;
+      background: white;
+      color: var(--mero-blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.4rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .greeting h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .search-box {
       background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 8px 16px;
+      margin-top: 16px;
+    }
+
+    .search-box input {
+      background: transparent;
       border: none;
+      color: white;
+      width: 100%;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--mero-blue-dark);
+      margin: 24px 16px 12px;
+      padding-left: 4px;
+    }
+
+    .app-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      padding: 12px 0 6px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .icon-container {
+      width: 60px;
+      height: 60px;
+      background: var(--surface);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .icon-container i {
+      font-size: 24px;
+      color: var(--mero-blue);
+    }
+
+    .app-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--on-surface);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .page-container {
+      display: none;
+      padding: 20px 16px;
+      background: var(--surface);
+      min-height: calc(100vh - 60px);
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -4px 20px var(--shadow);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 0 8px;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: none;
+      color: var(--mero-blue);
+      font-size: 1.4rem;
+      margin-right: 12px;
       width: 40px;
       height: 40px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-right: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
     }
 
-    .menu-toggle:hover {
-      background: rgba(255,255,255,0.3);
+    .page-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--mero-blue-dark);
     }
 
-    .menu-toggle i {
-      font-size: 1.2rem;
+    .widget-container {
+      background: var(--surface);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px var(--shadow);
+      margin-bottom: 16px;
     }
 
-    .content-area {
-      flex: 1;
-      padding: 0;
-      overflow-y: auto;
-      background-color: #ffffff;
-    }
-
-    /* Modern Bottom Navigation */
-    .bottom-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0;
-      box-shadow: 0 -2px 20px rgba(0,0,0,0.1);
-      z-index: 1000;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
-      margin: 0 10px 10px;
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 0;
-      min-width: 80px;
-      cursor: pointer;
-      position: relative;
-      transition: transform 0.2s;
-    }
-
-    .nav-item.active {
-      transform: translateY(-8px);
-    }
-
-    .nav-icon {
-      font-size: 1.4rem;
-      margin-bottom: 4px;
-      transition: color 0.2s;
-    }
-
-    .nav-text {
-      font-size: 0.75rem;
-      font-weight: 600;
-      transition: color 0.2s;
-    }
-
-    .nav-item:not(.active) .nav-icon,
-    .nav-item:not(.active) .nav-text {
-      color: #868e96;
-    }
-
-    .nav-item.active .nav-icon,
-    .nav-item.active .nav-text {
-      color: #1a73e8;
-    }
-
-    /* Active indicator */
-    .nav-item.active::after {
-      content: '';
-      position: absolute;
-      bottom: -12px;
-      width: 32px;
-      height: 6px;
-      background: #1a73e8;
-      border-radius: 3px;
-      box-shadow: 0 2px 6px rgba(26, 115, 232, 0.4);
-    }
-
-    .time-display {
-      text-align: center;
-      margin-top: 10px;
+    .attribution {
+      display: block;
+      text-align: left;
       font-size: 0.85rem;
-      color: #495057;
-      font-weight: 500;
-      padding: 0 16px;
+      color: var(--outline);
+      margin-top: 12px;
     }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    /* Sidebar Styles */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -300px;
-      width: 280px;
-      height: 100vh;
-      background: linear-gradient(to bottom, #0d47a1, #1a73e8);
-      color: white;
-      z-index: 2000;
-      transition: left 0.3s ease;
-      box-shadow: 3px 0 15px rgba(0,0,0,0.2);
-      overflow-y: auto;
-    }
-
-    .sidebar.open {
-      left: 0;
-    }
-
-    .sidebar-header {
-      padding: 20px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .sidebar-header h5 {
-      margin: 0;
+    .attribution a {
+      color: var(--mero-blue);
+      text-decoration: none;
       font-weight: 600;
     }
 
-    .sidebar-menu {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+    .setting-item {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 18px;
+      margin: 16px;
+      box-shadow: 0 2px 8px var(--shadow);
     }
 
-    .sidebar-menu li {
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    /* Collapsible Section */
-    .section-header {
-      padding: 14px 20px;
-      font-size: 0.9rem;
-      font-weight: bold;
-      color: rgba(255,255,255,0.9);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: none;
-      cursor: pointer;
+    .setting-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: background-color 0.2s;
     }
 
-    .section-header:hover {
-      background: rgba(255,255,255,0.1);
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 26px;
     }
 
-    .section-header i {
-      transition: transform 0.3s ease;
-    }
-
-    .section-header.collapsed i {
-      transform: rotate(-90deg);
-    }
-
-    .section-content {
-      overflow: hidden;
-      transition: max-height 0.3s ease, opacity 0.3s ease;
-    }
-
-    .section-content.hidden {
-      max-height: 0 !important;
-      opacity: 0;
-      visibility: hidden;
-      padding: 0 20px;
-    }
-
-    .sidebar-menu a {
-      color: rgba(255,255,255,0.9);
-      text-decoration: none;
-      padding: 14px 20px;
-      display: block;
-      font-size: 1.05rem;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-    }
-
-    .sidebar-menu a:hover {
-      background: rgba(255,255,255,0.15);
-      color: white;
-    }
-
-    .sidebar-menu i {
-      margin-right: 12px;
-      font-size: 1.2rem;
-    }
-
-    .overlay {
-      position: fixed;
+    .slider {
+      position: absolute;
+      cursor: pointer;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 1500;
-      display: none;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e1;
+      transition: .4s;
+      border-radius: 26px;
     }
 
-    .overlay.active {
-      display: block;
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    input:checked + .slider {
+      background-color: var(--mero-blue);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    .manage-icons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .manage-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 64px;
+      cursor: pointer;
+    }
+
+    .manage-icon .icon-container {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+    }
+
+    .manage-icon .app-label {
+      font-size: 0.8rem;
     }
   </style>
 </head>
 <body>
-  <!-- Overlay for sidebar -->
-  <div class="overlay" id="sidebarOverlay"></div>
 
-  <!-- Sidebar -->
-  <div class="sidebar" id="appSidebar">
-    <div class="sidebar-header">
-      <h5>Navigation Menu</h5>
+<!-- ========== LOGIN MODAL ========== -->
+<div id="login-modal">
+  <div class="login-card">
+    <h2>Welcome to Mero App</h2>
+    <div class="form-group">
+      <input type="email" id="email" class="form-control" placeholder="Email" required>
     </div>
-    <ul class="sidebar-menu">
-      <li><a href="#" data-page="home"><i class="bi bi-house-door"></i> Home</a></li>
-      <li><a href="#" data-page="profile"><i class="bi bi-person"></i> My Profile</a></li>
-      <li><a href="#" data-page="settings"><i class="bi bi-gear"></i> Settings</a></li>
-      <li><a href="#" data-page="about"><i class="bi bi-info-circle"></i> About App</a></li>
-      <li><a href="#" data-page="contact"><i class="bi bi-envelope"></i> Contact Us</a></li>
-      
-      <!-- Collapsible Link Section -->
-      <li>
-        <div class="section-header" id="linkSectionToggle">
-          Link
-          <i class="bi bi-chevron-down"></i>
-        </div>
-        <div class="section-content" id="linkSectionContent">
-          <a href="#" data-page="websitelibrary"><i class="bi bi-collection"></i> Website Library</a>
-        </div>
-      </li>
-    </ul>
+    <div class="form-group">
+      <input type="password" id="password" class="form-control" placeholder="Password" required>
+    </div>
+    <button class="btn-login" id="login-btn">Sign In</button>
+    <button class="btn-login btn-google" id="google-btn">Sign in with Google</button>
+    <div class="divider"><span>or</span></div>
+    <button class="btn-login" style="background:#64748b;" id="signup-btn">Create Account</button>
   </div>
+</div>
 
-  <div class="app-container">
-    <!-- Top Bar -->
-    <div class="top-bar">
-      <button class="menu-toggle" id="menuToggle">
-        <i class="bi bi-list"></i>
-      </button>
-      <h1 class="app-title">mero app</h1>
-    </div>
-
-    <!-- Live Time -->
-    <div class="time-display" id="nepal-time">
-      Loading time...
-    </div>
-
-    <!-- Content Area -->
-    <div class="content-area" id="main-content">
-      <div class="container mt-4">
-        <h4>Welcome to mero app</h4>
-        <p>Tap "tools", "calendar", or "My Documents" below to explore.</p>
+<!-- ========== HOME PAGE ========== -->
+<div id="home-page" style="display:none;">
+  <div class="app-bar">
+    <div class="user-info">
+      <div class="avatar" id="user-avatar">U</div>
+      <div class="greeting">
+        <h1>Good Morning!</h1>
+        <p id="user-email">user@example.com</p>
       </div>
     </div>
-
-    <!-- Modern Bottom Navigation -->
-    <div class="bottom-bar">
-      <div class="nav-item active" data-page="tools">
-        <i class="bi bi-tools nav-icon"></i>
-        <span class="nav-text">Tools</span>
-      </div>
-      <div class="nav-item" data-page="calendar">
-        <i class="bi bi-calendar nav-icon"></i>
-        <span class="nav-text">Calendar</span>
-      </div>
-      <div class="nav-item" data-page="documents">
-        <i class="bi bi-file-earmark-text nav-icon"></i>
-        <span class="nav-text">Documents</span>
-      </div>
+    <div class="search-box">
+      <input type="text" placeholder="Search apps...">
     </div>
   </div>
 
-  <!-- Bootstrap 5 JS + Popper -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Update Nepal time every second
-    function updateNepalTime() {
-      const options = {
-        timeZone: 'Asia/Kathmandu',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        weekday: 'short'
-      };
-      const formatter = new Intl.DateTimeFormat('en-US', options);
-      document.getElementById('nepal-time').textContent = formatter.format(new Date());
+  <h2 class="section-title">Favorite</h2>
+  <div id="favorite-grid" class="container">
+    <div class="row row-cols-4 g-3"></div>
+  </div>
+
+  <h2 class="section-title">Quick Access</h2>
+  <div id="quick-access-grid" class="container">
+    <div class="row row-cols-4 g-3"></div>
+  </div>
+</div>
+
+<!-- ========== PAGE 1: Gold & Silver ========== -->
+<div id="page-1" class="page-container">
+  <div class="page-header">
+    <button class="btn-back"><i class="fas fa-arrow-left"></i></button>
+    <h2 class="page-title">Gold & Silver Price</h2>
+  </div>
+  <div class="widget-container">
+    <iframe src="https://www.ashesh.com.np/gold/widget.php?api=850024q131&header_color=0077e5" frameborder="0" scrolling="no" style="border:none; width:100%; height:265px;"></iframe>
+  </div>
+  <span class="attribution">© <a href="https://www.ashesh.com.np/gold/" target="_blank">Gold Price Nepal</a></span>
+</div>
+
+<!-- ========== PAGE 6: Currency ========== -->
+<div id="page-6" class="page-container">
+  <div class="page-header">
+    <button class="btn-back"><i class="fas fa-arrow-left"></i></button>
+    <h2 class="page-title">Currency Converter</h2>
+  </div>
+  <div class="widget-container">
+    <iframe src="https://www.ashesh.com.np/forex/widget2.php?api=800129q041&header_color=38b45e&background_color=faf8ee&header_title=Nepal%20Exchange%20Rates" frameborder="0" scrolling="no" style="border:none; width:100%; height:383px;"></iframe>
+  </div>
+  <span class="attribution">© <a href="https://www.ashesh.com.np/forex/" target="_blank">Foreign Exchange Rates</a></span>
+</div>
+
+<!-- ========== OTHER PAGES (2–5, 7–15, 17–20) ========== -->
+<script>
+  const placeholderPages = [
+    { id: 2, name: "Date Converter", icon: "fas fa-calendar-alt" },
+    { id: 3, name: "My Notes", icon: "fas fa-sticky-note" },
+    { id: 4, name: "Expenditure", icon: "fas fa-chart-line" },
+    { id: 5, name: "Weather", icon: "fas fa-cloud-sun" },
+    { id: 7, name: "Calculator", icon: "fas fa-calculator" },
+    { id: 8, name: "To-Do List", icon: "fas fa-tasks" },
+    { id: 9, name: "Reminders", icon: "fas fa-bell" },
+    { id:10, name: "Health", icon: "fas fa-heartbeat" },
+    { id:11, name: "Expense Report", icon: "fas fa-file-invoice" },
+    { id:12, name: "Backup", icon: "fas fa-save" },
+    { id:13, name: "SMS", icon: "fas fa-envelope" },
+    { id:14, name: "Call Log", icon: "fas fa-phone" },
+    { id:15, name: "Files", icon: "fas fa-folder" },
+    { id:17, name: "Privacy", icon: "fas fa-shield-alt" },
+    { id:18, name: "Support", icon: "fas fa-headset" },
+    { id:19, name: "About", icon: "fas fa-info-circle" },
+    { id:20, name: "Feedback", icon: "fas fa-comment-dots" }
+  ];
+
+  placeholderPages.forEach(page => {
+    const div = document.createElement('div');
+    div.id = `page-${page.id}`;
+    div.className = 'page-container';
+    div.innerHTML = `
+      <div class="page-header">
+        <button class="btn-back"><i class="fas fa-arrow-left"></i></button>
+        <h2 class="page-title">${page.name}</h2>
+      </div>
+      <div style="text-align:center; padding:40px 20px;">
+        <i class="${page.icon} fa-4x" style="color:var(--outline); margin-bottom:24px;"></i>
+        <h3>${page.name}</h3>
+        <p style="color:var(--outline); margin-top:12px;">Coming soon!</p>
+        <button class="btn-back" style="margin-top:24px; background:var(--mero-blue-light); width:100px; height:40px; border-radius:20px;">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+      </div>
+    `;
+    document.body.appendChild(div);
+  });
+</script>
+
+<!-- ========== SETTINGS PAGE (16) ========== -->
+<div id="page-16" class="page-container">
+  <div class="page-header">
+    <button class="btn-back"><i class="fas fa-arrow-left"></i></button>
+    <h2 class="page-title">Settings</h2>
+  </div>
+
+  <div class="setting-item">
+    <div class="setting-label">Account</div>
+    <button class="btn-login" style="background:#ef4444; margin-top:12px;" id="logout-btn">Sign Out</button>
+  </div>
+
+  <div class="setting-item">
+    <div class="setting-label">Appearance</div>
+    <div class="setting-row">
+      <span id="theme-label">Light Mode</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="theme-toggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="setting-item">
+    <div class="setting-label">Favorite Apps</div>
+    <p style="margin:12px 0;color:var(--outline);">Tap to add or remove from Favorites</p>
+    <div class="manage-section">
+      <div class="manage-title">Your Favorites</div>
+      <div class="manage-icons" id="settings-fav-list"></div>
+    </div>
+    <div class="manage-section">
+      <div class="manage-title">Other Apps</div>
+      <div class="manage-icons" id="settings-quick-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== FIREBASE SDK ========== -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<script>
+  // ✅ YOUR FIREBASE CONFIG
+  const firebaseConfig = {
+    apiKey: "AIzaSyCmRtWiJ83YUE28EmXABNcsv2cZMb8Mguo",
+    authDomain: "meroapp-61711.firebaseapp.com",
+    projectId: "meroapp-61711",
+    storageBucket: "meroapp-61711.firebasestorage.app",
+    messagingSenderId: "729280641074",
+    appId: "1:729280641074:web:daf11ed246eb192f61a42b"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // DOM
+  const loginModal = document.getElementById('login-modal');
+  const homePage = document.getElementById('home-page');
+  const loginBtn = document.getElementById('login-btn');
+  const signupBtn = document.getElementById('signup-btn');
+  const googleBtn = document.getElementById('google-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  // App Data
+  const ALL_APPS = [
+    { id: 1, name: "Gold & Silver", icon: "fas fa-coins" },
+    { id: 2, name: "Date Converter", icon: "fas fa-calendar-alt" },
+    { id: 3, name: "My Notes", icon: "fas fa-sticky-note" },
+    { id: 4, name: "Expenditure", icon: "fas fa-chart-line" },
+    { id: 5, name: "Weather", icon: "fas fa-cloud-sun" },
+    { id: 6, name: "Currency", icon: "fas fa-exchange-alt" },
+    { id: 7, name: "Calculator", icon: "fas fa-calculator" },
+    { id: 8, name: "To-Do List", icon: "fas fa-tasks" },
+    { id: 9, name: "Reminders", icon: "fas fa-bell" },
+    { id:10, name: "Health", icon: "fas fa-heartbeat" },
+    { id:11, name: "Expense Report", icon: "fas fa-file-invoice" },
+    { id:12, name: "Backup", icon: "fas fa-save" },
+    { id:13, name: "SMS", icon: "fas fa-envelope" },
+    { id:14, name: "Call Log", icon: "fas fa-phone" },
+    { id:15, name: "Files", icon: "fas fa-folder" },
+    { id:16, name: "Settings", icon: "fas fa-cog" },
+    { id:17, name: "Privacy", icon: "fas fa-shield-alt" },
+    { id:18, name: "Support", icon: "fas fa-headset" },
+    { id:19, name: "About", icon: "fas fa-info-circle" },
+    { id:20, name: "Feedback", icon: "fas fa-comment-dots" }
+  ];
+
+  let favorites = JSON.parse(localStorage.getItem('mero_favorites')) || [1, 2, 3, 4];
+  let theme = localStorage.getItem('mero_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+
+  // Auth State Listener
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      loginModal.style.display = 'none';
+      homePage.style.display = 'block';
+      document.getElementById('user-email').textContent = user.email;
+      const initials = user.email.split('@')[0].substring(0,2).toUpperCase();
+      document.getElementById('user-avatar').textContent = initials;
+      renderHomeGrids();
+    } else {
+      loginModal.style.display = 'flex';
+      homePage.style.display = 'none';
     }
+  });
 
-    setInterval(updateNepalTime, 1000);
-    updateNepalTime(); // Initial call
+  // Login
+  loginBtn.addEventListener('click', () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    auth.signInWithEmailAndPassword(email, password)
+      .catch(err => alert('Login failed: ' + err.message));
+  });
 
-    // Sidebar functionality
-    const sidebar = document.getElementById('appSidebar');
-    const menuToggle = document.getElementById('menuToggle');
-    const overlay = document.getElementById('sidebarOverlay');
+  // Sign Up
+  signupBtn.addEventListener('click', () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    auth.createUserWithEmailAndPassword(email, password)
+      .catch(err => alert('Sign up failed: ' + err.message));
+  });
 
-    menuToggle.addEventListener('click', () => {
-      sidebar.classList.add('open');
-      overlay.classList.add('active');
+  // Google Sign-In
+  googleBtn.addEventListener('click', () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+      .catch(err => alert('Google sign-in failed: ' + err.message));
+  });
+
+  // Logout
+  logoutBtn.addEventListener('click', () => {
+    auth.signOut();
+  });
+
+  // UI Functions
+  function renderHomeGrids() {
+    const favGrid = document.querySelector('#favorite-grid .row');
+    const quickGrid = document.querySelector('#quick-access-grid .row');
+    favGrid.innerHTML = ''; quickGrid.innerHTML = '';
+    favorites.forEach(id => {
+      const app = ALL_APPS.find(a => a.id === id);
+      if (app && app.id !== 16) favGrid.innerHTML += createAppIcon(app);
     });
+    ALL_APPS.filter(app => !favorites.includes(app.id))
+      .forEach(app => quickGrid.innerHTML += createAppIcon(app));
+  }
 
-    overlay.addEventListener('click', () => {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('active');
+  function createAppIcon(app) {
+    return `<div class="col"><div class="app-icon" data-page="${app.id}"><div class="icon-container"><i class="${app.icon}"></i></div><div class="app-label">${app.name}</div></div></div>`;
+  }
+
+  function renderManageLists() {
+    const favList = document.getElementById('settings-fav-list');
+    const quickList = document.getElementById('settings-quick-list');
+    favList.innerHTML = ''; quickList.innerHTML = '';
+    favorites.filter(id => id !== 16).forEach(id => {
+      const app = ALL_APPS.find(a => a.id === id);
+      if (app) favList.innerHTML += createManageIcon(app);
     });
+    ALL_APPS.filter(app => !favorites.includes(app.id) && app.id !== 16)
+      .forEach(app => quickList.innerHTML += createManageIcon(app));
+  }
 
-    // Collapsible section logic
-    const linkSectionToggle = document.getElementById('linkSectionToggle');
-    const linkSectionContent = document.getElementById('linkSectionContent');
-    
-    // Initialize as collapsed
-    linkSectionContent.classList.add('hidden');
-    linkSectionToggle.classList.add('collapsed');
-    
-    linkSectionToggle.addEventListener('click', () => {
-      linkSectionContent.classList.toggle('hidden');
-      linkSectionToggle.classList.toggle('collapsed');
-    });
+  function createManageIcon(app) {
+    return `<div class="manage-icon" data-id="${app.id}"><div class="icon-container"><i class="${app.icon}"></i></div><div class="app-label">${app.name}</div></div>`;
+  }
 
-    // Handle sidebar navigation
-    document.querySelectorAll('.sidebar-menu a').forEach(link => {
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        const page = this.getAttribute('data-page');
-        loadContent(page);
-        
-        // Close sidebar
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-      });
-    });
-
-    // Handle bottom navigation clicks
-    document.querySelectorAll('.nav-item').forEach(item => {
-      item.addEventListener('click', function() {
-        // Remove active class from all
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        // Add active to clicked
-        this.classList.add('active');
-
-        const page = this.getAttribute('data-page');
-        loadContent(page);
-      });
-    });
-
-    // Content loader function
-    function loadContent(page) {
-      const content = document.getElementById('main-content');
-      
-      switch(page) {
-        case 'tools':
-          content.innerHTML = `<iframe src="https://maharjanil.github.io/tools/"></iframe>`;
-          break;
-          
-        case 'calendar':
-          content.innerHTML = `
-            <div class="container mt-4">
-              <h4 class="mb-3">📅 Calendar</h4>
-              <p>Today's events:</p>
-              <div class="alert alert-info mt-3">
-                No events scheduled.
-              </div>
-              <button class="btn btn-primary mt-2">+ Add Event</button>
-            </div>
-          `;
-          break;
-          
-        case 'documents':
-          content.innerHTML = `<iframe src="https://maharjanil.github.io/documents/"></iframe>`;
-          break;
-          
-        case 'websitelibrary':
-          content.innerHTML = `<iframe src="https://maharjanil.github.io/websitelibrary/"></iframe>`;
-          break;
-          
-        case 'home':
-          content.innerHTML = `
-            <div class="container mt-4">
-              <h4 class="mb-3">🏠 Home</h4>
-              <p>Welcome back! This is your main dashboard.</p>
-              <div class="card mt-3">
-                <div class="card-body">
-                  <h6>Quick Stats</h6>
-                  <p>You have 3 pending tasks</p>
-                </div>
-              </div>
-            </div>
-          `;
-          break;
-          
-        case 'profile':
-          content.innerHTML = `
-            <div class="container mt-4">
-              <h4 class="mb-3">👤 My Profile</h4>
-              <div class="text-center">
-                <div class="bg-light rounded-circle mx-auto mb-3" style="width:120px;height:120px;display:flex;align-items:center;justify-content:center;">
-                  <span class="display-4">A</span>
-                </div>
-                <h5>Anil Maharjan</h5>
-                <p class="text-muted">User since 2023</p>
-              </div>
-            </div>
-          `;
-          break;
-          
-        case 'settings':
-          content.innerHTML = `
-            <div class="container mt-4">
-              <h4 class="mb-3">⚙️ Settings</h4>
-              <div class="list-group">
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Theme
-                  <span class="badge bg-primary rounded-pill">Light</span>
-                </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Notifications
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" checked>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
-          break;
-          
-        case 'about':
-          content.innerHTML = `
-            <div class="container mt-4">
-              <h4 class="mb-3">ℹ️ About App</h4>
-              <p>This is a demo mobile application built with HTML, CSS, JavaScript, and Bootstrap 5.</p>
-              <p class="text-muted">Version 1.0.0</p>
-            </div>
-          `;
-          break;
-          
-        case 'contact':
-          content.innerHTML = `
-            <div class="container mt-4">
-              <h4 class="mb-3">✉️ Contact Us</h4>
-              <form>
-                <div class="mb-3">
-                  <label class="form-label">Your Message</label>
-                  <textarea class="form-control" rows="3"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Send Message</button>
-              </form>
-            </div>
-          `;
-          break;
-          
-        default:
-          content.innerHTML = `
-            <div class="container mt-4">
-              <h4>Welcome to mero app</h4>
-              <p>Select an option from the menu.</p>
-            </div>
-          `;
-      }
+  function toggleFavorite(id) {
+    if (id === 16) return;
+    if (favorites.includes(id)) {
+      favorites = favorites.filter(x => x !== id);
+    } else if (favorites.length < 8) {
+      favorites.push(id);
     }
-  </script>
+    localStorage.setItem('mero_favorites', JSON.stringify(favorites));
+    renderHomeGrids();
+    renderManageLists();
+  }
+
+  function initThemeToggle() {
+    const toggle = document.getElementById('theme-toggle');
+    const label = document.getElementById('theme-label');
+    toggle.checked = (theme === 'dark');
+    label.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+    toggle.addEventListener('change', () => {
+      const newTheme = toggle.checked ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('mero_theme', newTheme);
+      label.textContent = newTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    const appIcon = e.target.closest('.app-icon');
+    if (appIcon) return showPage(appIcon.getAttribute('data-page'));
+    const manageIcon = e.target.closest('.manage-icon');
+    if (manageIcon) return toggleFavorite(parseInt(manageIcon.getAttribute('data-id')));
+    if (e.target.closest('.btn-back')) return showHome();
+  });
+
+  function showPage(num) {
+    homePage.style.display = 'none';
+    document.getElementById(`page-${num}`).style.display = 'block';
+  }
+
+  function showHome() {
+    homePage.style.display = 'block';
+    for (let i = 1; i <= 20; i++) {
+      const el = document.getElementById(`page-${i}`);
+      if (el) el.style.display = 'none';
+    }
+  }
+
+  // Init
+  window.addEventListener('load', () => {
+    initThemeToggle();
+    renderManageLists();
+  });
+</script>
+
 </body>
 </html>
