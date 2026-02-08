@@ -516,9 +516,10 @@
   </div>
 </div>
 
-<!-- ========== FIREBASE SDK ========== -->
+<!-- ========== FIREBASE SDKs ========== -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
   // ✅ YOUR FIREBASE CONFIG
@@ -534,6 +535,7 @@
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
+  const db = firebase.firestore();
 
   // DOM
   const loginModal = document.getElementById('login-modal');
@@ -567,19 +569,61 @@
     { id:20, name: "Feedback", icon: "fas fa-comment-dots" }
   ];
 
-  let favorites = JSON.parse(localStorage.getItem('mero_favorites')) || [1, 2, 3, 4];
-  let theme = localStorage.getItem('mero_theme') || 'light';
-  document.documentElement.setAttribute('data-theme', theme);
+  // Global state
+  let currentTheme = 'light';
+  let currentFavorites = [1, 2, 3, 4];
+
+  // Firestore helpers
+  function getSettingsRef() {
+    const user = auth.currentUser;
+    return user ? db.collection('userSettings').doc(user.uid) : null;
+  }
+
+  async function saveSettings(theme, favorites) {
+    const ref = getSettingsRef();
+    if (ref) {
+      await ref.set({ theme, favorites }, { merge: true });
+    }
+  }
+
+  async function loadSettings() {
+    const ref = getSettingsRef();
+    if (ref) {
+      const doc = await ref.get();
+      if (doc.exists) {
+        const data = doc.data();
+        return {
+          theme: data.theme || 'light',
+          favorites: data.favorites || [1, 2, 3, 4]
+        };
+      }
+    }
+    return { theme: 'light', favorites: [1, 2, 3, 4] };
+  }
 
   // Auth State Listener
-  auth.onAuthStateChanged(user => {
+  auth.onAuthStateChanged(async (user) => {
     if (user) {
+      // Load user-specific settings from Firestore
+      const settings = await loadSettings();
+      currentTheme = settings.theme;
+      currentFavorites = settings.favorites;
+
+      // Apply theme
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      document.getElementById('theme-toggle').checked = (currentTheme === 'dark');
+      document.getElementById('theme-label').textContent = 
+        currentTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+
+      // Update UI
       loginModal.style.display = 'none';
       homePage.style.display = 'block';
       document.getElementById('user-email').textContent = user.email;
       const initials = user.email.split('@')[0].substring(0,2).toUpperCase();
       document.getElementById('user-avatar').textContent = initials;
+
       renderHomeGrids();
+      renderManageLists();
     } else {
       loginModal.style.display = 'flex';
       homePage.style.display = 'none';
@@ -619,11 +663,11 @@
     const favGrid = document.querySelector('#favorite-grid .row');
     const quickGrid = document.querySelector('#quick-access-grid .row');
     favGrid.innerHTML = ''; quickGrid.innerHTML = '';
-    favorites.forEach(id => {
+    currentFavorites.forEach(id => {
       const app = ALL_APPS.find(a => a.id === id);
       if (app && app.id !== 16) favGrid.innerHTML += createAppIcon(app);
     });
-    ALL_APPS.filter(app => !favorites.includes(app.id))
+    ALL_APPS.filter(app => !currentFavorites.includes(app.id))
       .forEach(app => quickGrid.innerHTML += createAppIcon(app));
   }
 
@@ -635,11 +679,11 @@
     const favList = document.getElementById('settings-fav-list');
     const quickList = document.getElementById('settings-quick-list');
     favList.innerHTML = ''; quickList.innerHTML = '';
-    favorites.filter(id => id !== 16).forEach(id => {
+    currentFavorites.filter(id => id !== 16).forEach(id => {
       const app = ALL_APPS.find(a => a.id === id);
       if (app) favList.innerHTML += createManageIcon(app);
     });
-    ALL_APPS.filter(app => !favorites.includes(app.id) && app.id !== 16)
+    ALL_APPS.filter(app => !currentFavorites.includes(app.id) && app.id !== 16)
       .forEach(app => quickList.innerHTML += createManageIcon(app));
   }
 
@@ -649,29 +693,26 @@
 
   function toggleFavorite(id) {
     if (id === 16) return;
-    if (favorites.includes(id)) {
-      favorites = favorites.filter(x => x !== id);
-    } else if (favorites.length < 8) {
-      favorites.push(id);
+    if (currentFavorites.includes(id)) {
+      currentFavorites = currentFavorites.filter(x => x !== id);
+    } else if (currentFavorites.length < 8) {
+      currentFavorites.push(id);
     }
-    localStorage.setItem('mero_favorites', JSON.stringify(favorites));
+    saveSettings(currentTheme, currentFavorites); // Sync to cloud
     renderHomeGrids();
     renderManageLists();
   }
 
-  function initThemeToggle() {
-    const toggle = document.getElementById('theme-toggle');
-    const label = document.getElementById('theme-label');
-    toggle.checked = (theme === 'dark');
-    label.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
-    toggle.addEventListener('change', () => {
-      const newTheme = toggle.checked ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('mero_theme', newTheme);
-      label.textContent = newTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
-    });
-  }
+  // Theme Toggle
+  document.getElementById('theme-toggle').addEventListener('change', (e) => {
+    currentTheme = e.target.checked ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    document.getElementById('theme-label').textContent = 
+      currentTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+    saveSettings(currentTheme, currentFavorites); // Sync to cloud
+  });
 
+  // Navigation
   document.addEventListener('click', (e) => {
     const appIcon = e.target.closest('.app-icon');
     if (appIcon) return showPage(appIcon.getAttribute('data-page'));
@@ -692,12 +733,6 @@
       if (el) el.style.display = 'none';
     }
   }
-
-  // Init
-  window.addEventListener('load', () => {
-    initThemeToggle();
-    renderManageLists();
-  });
 </script>
 
 </body>
