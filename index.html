@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0077e5" id="themeColorMeta">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mero App">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Mero App</title>
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="manifest" href='data:application/manifest+json,{"name":"Mero App","short_name":"MeroApp","description":"Tools, Directory & Documents for Nepal","start_url":"./","display":"standalone","orientation":"portrait","background_color":"%23f5f7fa","theme_color":"%230077e5","icons":[{"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}],"categories":["utilities","productivity"]}'>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+:root {
+  --primary: #0077e5;
+  --primary-dark: #005bb5;
+  --bg-body: #f5f7fa;
+  --bg-card: #ffffff;
+  --bg-elevated: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --border: #e2e8f0;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --header-height: 60px;
+  --nav-height: 70px;
+  --gold: #c9a84c;
+  --gold-light: #e8c97a;
+  --gold-dim: rgba(201, 168, 76, 0.15);
+}
+[data-theme="dark"] {
+  --bg-body: #0a0e1a;
+  --bg-card: #151a28;
+  --bg-elevated: #151a28;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --border: #2a3142;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --gold-dim: rgba(201, 168, 76, 0.12);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; overscroll-behavior: none; }
+body {
+  background: var(--bg-body);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  transition: background 0.3s, color 0.3s;
+  height: 100vh; height: 100dvh;
+  overflow: hidden;
+  position: fixed; width: 100%;
+}
+.app {
+  display: flex; flex-direction: column;
+  height: 100vh; height: 100dvh;
+  max-width: 500px; margin: 0 auto;
+  position: relative; background: var(--bg-body);
+  box-shadow: 0 0 40px rgba(0,0,0,0.05);
+}
+/* Header */
+.app-header {
+  background: var(--bg-elevated);
+  padding: calc(var(--safe-top) + 14px) 16px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: calc(var(--header-height) + var(--safe-top));
+  z-index: 10;
+}
+.app-header h1 {
+  font-size: 1.3rem; font-weight: 700; margin: 0;
+  color: var(--text-primary); letter-spacing: -0.02em;
+}
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: none; background: transparent;
+  color: var(--text-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; cursor: pointer;
+}
+.icon-btn:active { background: var(--border); }
+/* Screens */
+.screens { flex: 1; overflow: hidden; position: relative; }
+.screen {
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 16px calc(var(--nav-height) + var(--safe-bottom) + 20px);
+  opacity: 0; transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+}
+.screen.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+/* Bottom Nav */
+.bottom-nav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-around;
+  padding: 8px 0 calc(var(--safe-bottom) + 8px);
+  z-index: 100;
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+}
+:root:not([data-theme="dark"]) .bottom-nav { background: rgba(255,255,255,0.85); }
+[data-theme="dark"] .bottom-nav { background: rgba(21,26,40,0.9); }
+.nav-btn {
+  flex: 1; background: none; border: none;
+  padding: 8px 4px; color: var(--text-tertiary);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; transition: color 0.2s;
+  position: relative; font-family: inherit;
+}
+.nav-btn i { font-size: 1.3rem; transition: transform 0.2s; }
+.nav-btn span { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.02em; }
+.nav-btn.active { color: var(--primary); }
+.nav-btn.active i { transform: scale(1.15); }
+.nav-btn::before {
+  content: ''; position: absolute; top: 0; left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 28px; height: 3px;
+  background: var(--primary); border-radius: 0 0 3px 3px;
+  transition: transform 0.25s;
+}
+.nav-btn.active::before { transform: translateX(-50%) scaleX(1); }
+/* Welcome Card */
+.welcome-card {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white; border-radius: 20px;
+  padding: 22px 20px; margin-bottom: 20px;
+  box-shadow: var(--shadow-md);
+  position: relative; overflow: hidden;
+}
+.welcome-card::after {
+  content: ''; position: absolute;
+  top: -50%; right: -20%;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,0.1); border-radius: 50%;
+}
+.welcome-card h2 { font-size: 1.3rem; font-weight: 700; margin: 0 0 6px; position: relative; z-index: 1; }
+.welcome-card p { margin: 0; opacity: 0.9; font-size: 0.9rem; position: relative; z-index: 1; }
+.section-title {
+  font-size: 0.8rem; font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin: 20px 4px 12px;
+}
+.tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.tool-card {
+  background: var(--bg-card);
+  border-radius: 16px; padding: 16px 14px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: transform 0.15s;
+  display: flex; flex-direction: column; gap: 10px;
+  box-shadow: var(--shadow-sm);
+}
+.tool-card:active { transform: scale(0.96); }
+.tool-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; color: white;
+}
+.tool-card h3 { font-size: 0.95rem; font-weight: 600; margin: 0; color: var(--text-primary); }
+.tool-card p { font-size: 0.75rem; color: var(--text-secondary); margin: 0; }
+.tool-icon.gold { background: linear-gradient(135deg, #0077e5, #005bb5); }
+.tool-icon.forex { background: linear-gradient(135deg, #38b45e, #2d8f4a); }
+.tool-icon.fuel { background: linear-gradient(135deg, #6b7280, #4b5563); }
+.tool-icon.veg { background: linear-gradient(135deg, #519122, #3d6e19); }
+.tool-icon.date { background: linear-gradient(135deg, #21ADE2, #1a8ab5); }
+.tool-icon.weather { background: linear-gradient(135deg, #00a2e2, #0077b3); }
+.tool-icon.unicode { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.tool-icon.panchang { background: linear-gradient(135deg, #64748b, #475569); }
+/* Directory */
+.search-wrap { position: sticky; top: 0; background: var(--bg-body); padding-bottom: 12px; z-index: 5; }
+.search-box {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; display: flex; align-items: center;
+  padding: 0 14px; box-shadow: var(--shadow-sm);
+}
+.search-box i { color: var(--text-tertiary); font-size: 1.1rem; }
+.search-box input {
+  flex: 1; border: none; outline: none;
+  padding: 14px 10px; background: transparent;
+  color: var(--text-primary); font-size: 1rem; font-family: inherit;
+}
+.search-box input::placeholder { color: var(--text-tertiary); }
+.clear-btn {
+  background: none; border: none; color: var(--text-tertiary);
+  font-size: 1.2rem; cursor: pointer; padding: 4px; display: none;
+}
+.clear-btn.show { display: block; }
+.filter-toggle {
+  display: flex; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 4px; margin-top: 10px; gap: 4px;
+}
+.filter-btn {
+  flex: 1; background: transparent; border: none;
+  padding: 10px; border-radius: 8px;
+  font-weight: 600; font-size: 0.85rem;
+  color: var(--text-secondary); cursor: pointer;
+  transition: all 0.2s; font-family: inherit;
+}
+.filter-btn.active { background: var(--primary); color: white; }
+.contact-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 12px;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.fav-btn {
+  background: none; border: none; color: var(--text-tertiary);
+  font-size: 1.3rem; cursor: pointer; padding: 4px;
+}
+.fav-btn.active { color: #f59e0b; }
+.avatar {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: linear-gradient(135deg, #e0eafc, #cfdef3);
+  color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1rem; flex-shrink: 0;
+}
+[data-theme="dark"] .avatar {
+  background: linear-gradient(135deg, #1e3a5f, #2d4a7c); color: #60a5fa;
+}
+.contact-info { flex: 1; min-width: 0; }
+.contact-info h5 {
+  font-size: 1rem; font-weight: 600; margin: 0 0 4px;
+  color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.relation-tag {
+  display: inline-block; background: rgba(0,119,229,0.12);
+  color: var(--primary); font-size: 0.7rem; font-weight: 600;
+  padding: 2px 8px; border-radius: 10px;
+}
+.call-btn {
+  width: 42px; height: 42px;
+  background: rgba(0,119,229,0.12); color: var(--primary);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; text-decoration: none; flex-shrink: 0;
+}
+.call-btn:active { background: var(--primary); color: white; }
+/* States */
+.state-msg { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+.state-msg i { font-size: 3.5rem; color: var(--text-tertiary); margin-bottom: 16px; display: block; }
+.state-msg h4 { color: var(--text-primary); font-weight: 600; margin: 0 0 6px; font-size: 1.1rem; }
+.state-msg p { margin: 0; font-size: 0.9rem; }
+.d-none { display: none !important; }
+/* Settings */
+.settings-group {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+  margin-bottom: 16px; box-shadow: var(--shadow-sm);
+}
+.settings-item {
+  display: flex; align-items: center;
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+  gap: 14px; cursor: pointer;
+}
+.settings-item:last-child { border-bottom: none; }
+.settings-item:active { background: var(--border); }
+.settings-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; color: white; flex-shrink: 0;
+}
+.settings-item-content { flex: 1; min-width: 0; }
+.settings-item-content h4 { margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+.settings-item-content p { margin: 2px 0 0; font-size: 0.8rem; color: var(--text-secondary); }
+.chevron { color: var(--text-tertiary); font-size: 0.9rem; }
+.toggle {
+  position: relative; width: 48px; height: 28px;
+  background: var(--border); border-radius: 14px;
+  cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+}
+.toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 24px; height: 24px; background: white;
+  border-radius: 50%; transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle.on { background: var(--primary); }
+.toggle.on::after { transform: translateX(20px); }
+/* Bottom Sheet Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.modal-overlay.show { opacity: 1; pointer-events: auto; }
+.bottom-sheet {
+  background: var(--bg-elevated);
+  width: 100%; max-width: 500px;
+  max-height: 92vh; max-height: 92dvh;
+  border-radius: 20px 20px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.modal-overlay.show .bottom-sheet { transform: translateY(0); }
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--border); border-radius: 2px;
+  margin: 10px auto 0; flex-shrink: 0;
+}
+.sheet-header {
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.sheet-header h3 { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text-primary); }
+.sheet-close {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--border); border: none;
+  color: var(--text-primary);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1.1rem;
+}
+.sheet-body { flex: 1; overflow: auto; padding: 16px; background: var(--bg-body); }
+.sheet-body iframe { width: 100%; border: none; border-radius: 10px; background: white; }
+/* Install Banner */
+.install-banner {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white; padding: 16px; border-radius: 14px;
+  margin-bottom: 16px; display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--shadow-md);
+}
+.install-banner i { font-size: 2rem; }
+.install-banner-content { flex: 1; }
+.install-banner h4 { margin: 0 0 2px; font-size: 0.95rem; font-weight: 700; }
+.install-banner p { margin: 0; font-size: 0.8rem; opacity: 0.9; }
+.install-btn {
+  background: white; color: var(--primary);
+  border: none; padding: 8px 16px; border-radius: 20px;
+  font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: inherit;
+}
+/* About */
+.about-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px 20px;
+  text-align: center; margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.app-logo {
+  width: 72px; height: 72px; border-radius: 18px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; margin: 0 auto 12px;
+  box-shadow: var(--shadow-md);
+}
+.about-card h3 { margin: 0 0 4px; font-weight: 700; color: var(--text-primary); }
+.about-card p { margin: 0; color: var(--text-secondary); font-size: 0.85rem; }
+.version {
+  display: inline-block; background: var(--border);
+  color: var(--text-secondary); padding: 3px 10px;
+  border-radius: 10px; font-size: 0.75rem;
+  margin-top: 8px; font-weight: 600;
+}
+/* ===== DOCUMENTS SCREEN ===== */
+.doc-welcome {
+  background: linear-gradient(135deg, #1a1f2e, #0f1420);
+  color: #f0ece3;
+  border-radius: 20px;
+  padding: 24px 20px;
+  margin-bottom: 20px;
+  position: relative; overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.doc-welcome::before {
+  content: ''; position: absolute;
+  top: -50%; right: -20%;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.doc-welcome .eyebrow {
+  font-size: 0.7rem; font-weight: 500;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 8px;
+  position: relative; z-index: 1;
+}
+.doc-welcome h2 {
+  font-size: 1.4rem; font-weight: 300; margin: 0 0 6px;
+  position: relative; z-index: 1;
+  font-family: Georgia, serif;
+}
+.doc-welcome h2 em { font-style: italic; color: var(--gold-light); }
+.doc-welcome p {
+  margin: 0; font-size: 0.85rem; opacity: 0.7;
+  position: relative; z-index: 1;
+}
+.doc-search {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; display: flex; align-items: center;
+  padding: 0 14px; box-shadow: var(--shadow-sm);
+  margin-bottom: 12px;
+}
+.doc-search i { color: var(--gold); font-size: 1.1rem; }
+.doc-search input {
+  flex: 1; border: none; outline: none;
+  padding: 14px 10px; background: transparent;
+  color: var(--text-primary); font-size: 1rem; font-family: inherit;
+}
+.doc-search input::placeholder { color: var(--text-tertiary); }
+.doc-clear {
+  background: none; border: none; color: var(--text-tertiary);
+  font-size: 1.2rem; cursor: pointer; padding: 4px; display: none;
+}
+.doc-clear.show { display: block; }
+.doc-actions {
+  display: flex; gap: 8px; margin-bottom: 16px;
+  overflow-x: auto; padding-bottom: 4px;
+  -ms-overflow-style: none; scrollbar-width: none;
+}
+.doc-actions::-webkit-scrollbar { display: none; }
+.doc-chip {
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 8px 14px; border-radius: 20px;
+  font-size: 0.8rem; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: all 0.2s; font-family: inherit;
+  display: flex; align-items: center; gap: 6px;
+}
+.doc-chip.active {
+  background: var(--primary); color: white; border-color: var(--primary);
+}
+.doc-chip i { font-size: 0.85rem; }
+.doc-count {
+  font-size: 0.75rem; color: var(--text-secondary);
+  margin: 0 4px 12px; letter-spacing: 0.05em;
+}
+.doc-count span { color: var(--primary); font-weight: 700; }
+.doc-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+}
+.doc-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+  cursor: pointer; box-shadow: var(--shadow-sm);
+  transition: transform 0.15s;
+}
+.doc-card:active { transform: scale(0.97); }
+.doc-card-img {
+  width: 100%; height: 110px;
+  background: var(--border);
+  background-size: cover; background-position: center;
+  position: relative;
+}
+.doc-card-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.3), transparent 50%);
+}
+.doc-card-tag {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+  color: white; font-size: 0.65rem; font-weight: 600;
+  padding: 3px 8px; border-radius: 8px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  z-index: 1;
+}
+.doc-card-body { padding: 10px 12px 12px; }
+.doc-card-body h4 {
+  font-size: 0.85rem; font-weight: 600; margin: 0 0 4px;
+  color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.doc-card-body p {
+  font-size: 0.7rem; color: var(--text-secondary); margin: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Doc Modal (preview) */
+.doc-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1100; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.doc-modal-overlay.show { opacity: 1; pointer-events: auto; }
+.doc-modal {
+  background: var(--bg-elevated);
+  width: 100%; max-width: 500px;
+  max-height: 95vh; max-height: 95dvh;
+  border-radius: 20px 20px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.doc-modal-overlay.show .doc-modal { transform: translateY(0); }
+.doc-modal-header {
+  padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.doc-modal-header .eyebrow {
+  font-size: 0.65rem; letter-spacing: 0.25em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 2px;
+}
+.doc-modal-header h3 {
+  margin: 0; font-size: 1rem; font-weight: 700;
+  color: var(--text-primary);
+}
+.doc-modal-body {
+  flex: 1; overflow: auto; background: var(--bg-body);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; min-height: 300px;
+}
+.doc-modal-body img {
+  max-width: 100%; max-height: 60vh;
+  border-radius: 10px; box-shadow: var(--shadow-md);
+  display: block;
+}
+.doc-modal-footer {
+  padding: 14px 16px calc(var(--safe-bottom) + 14px);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0; background: var(--bg-elevated);
+}
+.doc-modal-desc {
+  flex: 1; font-size: 0.8rem; color: var(--text-secondary);
+  margin: 0; line-height: 1.4;
+}
+.doc-download-btn {
+  background: linear-gradient(135deg, var(--gold), #a07830);
+  color: #0b0c0f; border: none;
+  padding: 10px 16px; border-radius: 20px;
+  font-weight: 700; font-size: 0.8rem;
+  cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: inherit; white-space: nowrap;
+}
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+.pulse { animation: pulse 2s infinite ease-in-out; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 1s linear infinite; }
+.screen::-webkit-scrollbar, .sheet-body::-webkit-scrollbar, .doc-modal-body::-webkit-scrollbar { width: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="app-header">
+    <h1 id="headerTitle">Mero App</h1>
+    <div>
+      <button class="icon-btn" id="installBtn" style="display:none" aria-label="Install">
+        <i class="bi bi-download"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="screens">
+    <!-- Tools Screen -->
+    <section class="screen active" id="screen-tools">
+      <div class="welcome-card">
+        <h2>Namaste! 🙏</h2>
+        <p id="welcomeDate">Loading...</p>
+      </div>
+      <div class="section-title">Live Rates</div>
+      <div class="tools-grid">
+        <div class="tool-card" data-tool="gold">
+          <div class="tool-icon gold"><i class="bi bi-coin"></i></div>
+          <div><h3>Gold & Silver</h3><p>Today's rates</p></div>
+        </div>
+        <div class="tool-card" data-tool="forex">
+          <div class="tool-icon forex"><i class="bi bi-currency-exchange"></i></div>
+          <div><h3>Forex Rates</h3><p>Currency exchange</p></div>
+        </div>
+        <div class="tool-card" data-tool="fuel">
+          <div class="tool-icon fuel"><i class="bi bi-fuel-pump"></i></div>
+          <div><h3>Fuel Rates</h3><p>Petrol, diesel</p></div>
+        </div>
+        <div class="tool-card" data-tool="veg">
+          <div class="tool-icon veg"><i class="bi bi-basket3"></i></div>
+          <div><h3>Kalbazar</h3><p>Fruits & veggies</p></div>
+        </div>
+      </div>
+      <div class="section-title">Utilities</div>
+      <div class="tools-grid">
+        <div class="tool-card" data-tool="date">
+          <div class="tool-icon date"><i class="bi bi-calendar3"></i></div>
+          <div><h3>Date Converter</h3><p>BS ↔ AD</p></div>
+        </div>
+        <div class="tool-card" data-tool="weather">
+          <div class="tool-icon weather"><i class="bi bi-cloud-sun"></i></div>
+          <div><h3>Weather</h3><p>Nepal forecast</p></div>
+        </div>
+        <div class="tool-card" data-tool="unicode">
+          <div class="tool-icon unicode"><i class="bi bi-fonts"></i></div>
+          <div><h3>Unicode</h3><p>Nepali typing</p></div>
+        </div>
+        <div class="tool-card" data-tool="panchang">
+          <div class="tool-icon panchang"><i class="bi bi-moon-stars"></i></div>
+          <div><h3>Panchang</h3><p>Hindu calendar</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Directory Screen -->
+    <section class="screen" id="screen-directory">
+      <div class="search-wrap">
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input type="text" id="searchInput" placeholder="Search contacts..." autocomplete="off">
+          <button class="clear-btn" id="clearBtn"><i class="bi bi-x-circle-fill"></i></button>
+        </div>
+        <div class="filter-toggle">
+          <button class="filter-btn active" id="filterAll">All</button>
+          <button class="filter-btn" id="filterFavs"><i class="bi bi-star-fill"></i> Favorites</button>
+        </div>
+      </div>
+      <div id="loadingState" class="state-msg d-none">
+        <i class="bi bi-arrow-repeat spin"></i>
+        <h4>Loading...</h4><p>Fetching directory</p>
+      </div>
+      <div id="idleState" class="state-msg d-none">
+        <i class="bi bi-search pulse"></i>
+        <h4>Search Contacts</h4><p>Type a name, number, or relation</p>
+      </div>
+      <div id="emptyFavsState" class="state-msg d-none">
+        <i class="bi bi-star"></i>
+        <h4>No Favorites</h4><p>Tap the star to add contacts</p>
+      </div>
+      <div id="errorState" class="state-msg d-none">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <h4>Connection Error</h4><p>Check your internet & try again</p>
+      </div>
+      <div id="emptySearchState" class="state-msg d-none">
+        <i class="bi bi-emoji-frown"></i>
+        <h4>No Results</h4><p>Try a different search term</p>
+      </div>
+      <div id="resultsContainer"></div>
+    </section>
+
+    <!-- Documents Screen -->
+    <section class="screen" id="screen-documents">
+      <div class="doc-welcome">
+        <p class="eyebrow">Personal Vault</p>
+        <h2>My <em>Documents</em></h2>
+        <p>Search and access your important records</p>
+      </div>
+      <div class="doc-search">
+        <i class="bi bi-search"></i>
+        <input type="text" id="docSearchInput" placeholder="Search by name or description..." autocomplete="off">
+        <button class="doc-clear" id="docClearBtn"><i class="bi bi-x-circle-fill"></i></button>
+      </div>
+      <div class="doc-actions" id="docChips">
+        <button class="doc-chip active" data-cat="all"><i class="bi bi-border-all"></i> All</button>
+        <button class="doc-chip" data-cat="Identity"><i class="bi bi-person-badge"></i> Identity</button>
+        <button class="doc-chip" data-cat="Finance"><i class="bi bi-bank"></i> Finance</button>
+        <button class="doc-chip" data-cat="QR / Payment"><i class="bi bi-qr-code"></i> QR</button>
+        <button class="doc-chip" data-cat="Medical"><i class="bi bi-capsule"></i> Medical</button>
+      </div>
+      <div class="doc-count" id="docCount"></div>
+      <div id="docLoading" class="state-msg d-none">
+        <i class="bi bi-arrow-repeat spin"></i>
+        <h4>Loading...</h4><p>Preparing documents</p>
+      </div>
+      <div id="docEmpty" class="state-msg d-none">
+        <i class="bi bi-emoji-frown"></i>
+        <h4>No Documents</h4><p>Try a different search or category</p>
+      </div>
+      <div class="doc-grid" id="docGrid"></div>
+    </section>
+
+    <!-- Settings Screen -->
+    <section class="screen" id="screen-settings">
+      <div class="about-card">
+        <div class="app-logo"><i class="bi bi-grid-1x2-fill"></i></div>
+        <h3>Mero App</h3>
+        <p>Tools, Directory & Documents</p>
+        <span class="version">v1.1.0</span>
+      </div>
+      <div id="installBannerContainer"></div>
+      <div class="section-title">Preferences</div>
+      <div class="settings-group">
+        <div class="settings-item" id="themeToggle">
+          <div class="settings-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5)">
+            <i class="bi bi-moon-stars-fill"></i>
+          </div>
+          <div class="settings-item-content">
+            <h4>Dark Mode</h4><p>Easier on the eyes</p>
+          </div>
+          <div class="toggle" id="themeSwitch"></div>
+        </div>
+      </div>
+      <div class="section-title">App</div>
+      <div class="settings-group">
+        <div class="settings-item" id="installSettings">
+          <div class="settings-icon" style="background: linear-gradient(135deg, #10b981, #059669)">
+            <i class="bi bi-download"></i>
+          </div>
+          <div class="settings-item-content">
+            <h4>Install App</h4><p>Add to home screen</p>
+          </div>
+          <i class="bi bi-chevron-right chevron"></i>
+        </div>
+        <div class="settings-item" id="refreshData">
+          <div class="settings-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706)">
+            <i class="bi bi-arrow-clockwise"></i>
+          </div>
+          <div class="settings-item-content">
+            <h4>Refresh Data</h4><p>Reload directory</p>
+          </div>
+          <i class="bi bi-chevron-right chevron"></i>
+        </div>
+      </div>
+      <div class="section-title">About</div>
+      <div class="settings-group">
+        <div class="settings-item">
+          <div class="settings-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8)">
+            <i class="bi bi-info-circle-fill"></i>
+          </div>
+          <div class="settings-item-content">
+            <h4>Version</h4><p>1.1.0 • July 2026</p>
+          </div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-icon" style="background: linear-gradient(135deg, #ec4899, #be185d)">
+            <i class="bi bi-heart-fill"></i>
+          </div>
+          <div class="settings-item-content">
+            <h4>Made for Nepal</h4><p>With ❤️ from Nepal</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-screen="tools">
+      <i class="bi bi-grid-fill"></i><span>Tools</span>
+    </button>
+    <button class="nav-btn" data-screen="directory">
+      <i class="bi bi-telephone-fill"></i><span>Directory</span>
+    </button>
+    <button class="nav-btn" data-screen="documents">
+      <i class="bi bi-folder-fill"></i><span>Documents</span>
+    </button>
+    <button class="nav-btn" data-screen="settings">
+      <i class="bi bi-gear-fill"></i><span>Settings</span>
+    </button>
+  </nav>
+</div>
+
+<!-- Tool Bottom Sheet Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="bottom-sheet" id="bottomSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h3 id="sheetTitle">Tool</h3>
+      <button class="sheet-close" id="sheetClose"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+</div>
+
+<!-- Document Preview Modal -->
+<div class="doc-modal-overlay" id="docModalOverlay">
+  <div class="doc-modal">
+    <div class="doc-modal-header">
+      <div>
+        <div class="eyebrow">Document Preview</div>
+        <h3 id="docModalTitle">Document</h3>
+      </div>
+      <button class="sheet-close" id="docModalClose"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="doc-modal-body">
+      <img id="docModalImg" src="" alt="">
+    </div>
+    <div class="doc-modal-footer">
+      <p class="doc-modal-desc" id="docModalDesc"></p>
+      <a class="doc-download-btn" id="docModalDownload" href="#" download>
+        <i class="bi bi-download"></i> Download
+      </a>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script>
+// ========== THEME ==========
+const html = document.getElementById('htmlRoot');
+const themeSwitch = document.getElementById('themeSwitch');
+const themeColorMeta = document.getElementById('themeColorMeta');
+const savedTheme = localStorage.getItem('theme') ||
+  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+applyTheme(savedTheme);
+
+function applyTheme(theme) {
+  html.setAttribute('data-theme', theme);
+  themeSwitch.classList.toggle('on', theme === 'dark');
+  themeColorMeta.content = theme === 'dark' ? '#0a0e1a' : '#0077e5';
+  localStorage.setItem('theme', theme);
+}
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const current = html.getAttribute('data-theme');
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+// ========== NAVIGATION ==========
+const screens = document.querySelectorAll('.screen');
+const navBtns = document.querySelectorAll('.nav-btn');
+const headerTitle = document.getElementById('headerTitle');
+const titles = { tools: 'Mero App', directory: 'Phone Directory', documents: 'My Documents', settings: 'Settings' };
+
+navBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.screen;
+    navBtns.forEach(b => b.classList.toggle('active', b === btn));
+    screens.forEach(s => s.classList.toggle('active', s.id === `screen-${target}`));
+    headerTitle.textContent = titles[target];
+    document.getElementById(`screen-${target}`).scrollTop = 0;
+  });
+});
+
+// ========== WELCOME DATE ==========
+function updateWelcomeDate() {
+  const now = new Date();
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('welcomeDate').textContent =
+    now.toLocaleDateString('en-US', options);
+}
+updateWelcomeDate();
+
+// ========== TOOLS MODAL ==========
+const toolData = {
+  gold: { title: 'Gold & Silver Price', iframe: 'https://www.ashesh.com.np/gold/widget.php?api=621113p553&header_color=0077e5', height: 265 },
+  forex: { title: 'Foreign Exchange Rates', iframe: 'https://www.ashesh.com.np/forex/widget2.php?api=621117p597&header_color=38b45e&background_color=faf8ee&header_title=Nepal%20Exchange%20Rates', height: 383 },
+  fuel: { title: 'Fuel Rates', iframe: 'https://www.ashesh.com.np/fuel/widget.php?api=641110p120&title=Nepal%20Fuel%20Rates&header_color=dedede&header_text_color=303030', height: 275 },
+  veg: { title: 'Fruits & Vegetables', iframe: 'https://www.ashesh.com.np/vegetable/widget.php?api=641115p195&header_color=519122', height: 265 },
+  date: { title: 'Date Converter (BS ↔ AD)', iframe: 'https://www.ashesh.com.np/linkdate-converter.php?h_color=21ADE2&b_color=CFE4B1&api=641117p214', height: 186 },
+  weather: { title: 'Nepal Weather', iframe: 'https://www.ashesh.com.np/weather/widget.php?title=Nepal%20Weather%20Observation&header_color=00a2e2&api=641112p367', height: 383 },
+  unicode: { title: 'Nepali Unicode', iframe: 'https://www.ashesh.com.np/linknepali-unicode3.php?api=641111p353', height: 400 },
+  panchang: { title: 'Nepali Panchang', iframe: 'https://www.ashesh.com.np/panchang/widget.php?header_title=Nepali%20Panchang&header_color=e6e5e2&api=641113p383', height: 365 }
+};
+
+const modalOverlay = document.getElementById('modalOverlay');
+const sheetTitle = document.getElementById('sheetTitle');
+const sheetBody = document.getElementById('sheetBody');
+const sheetClose = document.getElementById('sheetClose');
+
+document.querySelectorAll('.tool-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const tool = card.dataset.tool;
+    const data = toolData[tool];
+    if (!data) return;
+    sheetTitle.textContent = data.title;
+    sheetBody.innerHTML = `<iframe src="${data.iframe}" style="height:${data.height}px" allowtransparency="true"></iframe>`;
+    modalOverlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  });
+});
+
+function closeModal() {
+  modalOverlay.classList.remove('show');
+  document.body.style.overflow = '';
+  setTimeout(() => { sheetBody.innerHTML = ''; }, 300);
+}
+
+sheetClose.addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', (e) => {
+  if (e.target === modalOverlay) closeModal();
+});
+
+// ========== PHONE DIRECTORY ==========
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTENWe1Qp3ojkeAr_bBwdujlOdFPVtNsaNYB8cQ7INXBr3kg5LuN5MkSwPuJspOmWRjy9yP3Fu22yK0/pub?output=csv';
+let directoryData = [];
+let currentFilter = 'all';
+const searchInput = document.getElementById('searchInput');
+const clearBtn = document.getElementById('clearBtn');
+const resultsContainer = document.getElementById('resultsContainer');
+const states = {
+  loading: document.getElementById('loadingState'),
+  idle: document.getElementById('idleState'),
+  emptyFavs: document.getElementById('emptyFavsState'),
+  error: document.getElementById('errorState'),
+  emptySearch: document.getElementById('emptySearchState')
+};
+const filterAllBtn = document.getElementById('filterAll');
+const filterFavsBtn = document.getElementById('filterFavs');
+
+function getFavorites() {
+  return JSON.parse(localStorage.getItem('phoneDirectoryFavorites') || '[]');
+}
+function saveFavorites(favs) {
+  localStorage.setItem('phoneDirectoryFavorites', JSON.stringify(favs));
+}
+function toggleFavorite(phone) {
+  let favs = getFavorites();
+  if (favs.includes(phone)) favs = favs.filter(p => p !== phone);
+  else favs.push(phone);
+  saveFavorites(favs);
+  handleSearch();
+}
+
+async function loadDirectory() {
+  showDirState('loading');
+  try {
+    const res = await fetch(SHEET_CSV_URL);
+    if (!res.ok) throw new Error('Network error');
+    const csv = await res.text();
+    const parsed = Papa.parse(csv, {
+      header: true, skipEmptyLines: true,
+      transformHeader: h => h.trim()
+    });
+    directoryData = parsed.data;
+    showDirState('idle');
+  } catch (e) {
+    console.error(e);
+    showDirState('error');
+  }
+}
+
+function showDirState(state) {
+  Object.values(states).forEach(s => s.classList.add('d-none'));
+  resultsContainer.innerHTML = '';
+  if (state === 'results') return;
+  const map = { loading: 'loading', idle: 'idle', 'empty-favs': 'emptyFavs', error: 'error', 'empty-search': 'emptySearch' };
+  states[map[state]]?.classList.remove('d-none');
+}
+
+function handleSearch() {
+  const query = searchInput.value.toLowerCase().trim();
+  clearBtn.classList.toggle('show', query.length > 0);
+  let data = directoryData;
+  if (currentFilter === 'favorites') {
+    const favPhones = getFavorites();
+    data = data.filter(p => favPhones.includes(p.Phone));
+    if (data.length === 0 && !query) { showDirState('empty-favs'); return; }
+  } else if (!query) { showDirState('idle'); return; }
+  if (query) {
+    data = data.filter(p =>
+      (p.Name && p.Name.toLowerCase().includes(query)) ||
+      (p.Phone && p.Phone.includes(query)) ||
+      (p.Relation && p.Relation.toLowerCase().includes(query))
+    );
+  }
+  if (data.length === 0) showDirState('empty-search');
+  else { showDirState('results'); renderResults(data); }
+}
+
+function renderResults(data) {
+  resultsContainer.innerHTML = '';
+  const favPhones = getFavorites();
+  data.forEach(person => {
+    const name = person.Name || 'Unknown';
+    const phone = (person.Phone || '').trim();
+    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    const isFav = favPhones.includes(phone);
+    const card = document.createElement('div');
+    card.className = 'contact-card';
+    card.innerHTML = `
+      <button class="fav-btn ${isFav ? 'active' : ''}" data-phone="${phone}">
+        <i class="bi ${isFav ? 'bi-star-fill' : 'bi-star'}"></i>
+      </button>
+      <div class="avatar">${initials}</div>
+      <div class="contact-info">
+        <h5>${name}</h5>
+        <span class="relation-tag">${person.Relation || 'N/A'}</span>
+      </div>
+      <a href="tel:${phone}" class="call-btn"><i class="bi bi-telephone-fill"></i></a>
+    `;
+    resultsContainer.appendChild(card);
+  });
+  resultsContainer.querySelectorAll('.fav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const phone = btn.dataset.phone;
+      if (phone) toggleFavorite(phone);
+    });
+  });
+}
+
+searchInput.addEventListener('input', handleSearch);
+clearBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  clearBtn.classList.remove('show');
+  handleSearch();
+});
+filterAllBtn.addEventListener('click', () => {
+  currentFilter = 'all';
+  filterAllBtn.classList.add('active');
+  filterFavsBtn.classList.remove('active');
+  handleSearch();
+});
+filterFavsBtn.addEventListener('click', () => {
+  currentFilter = 'favorites';
+  filterFavsBtn.classList.add('active');
+  filterAllBtn.classList.remove('active');
+  handleSearch();
+});
+document.getElementById('refreshData').addEventListener('click', loadDirectory);
+loadDirectory();
+
+// ========== DOCUMENTS ==========
+const docData = [
+  { id: 1,  name: "Citizenship",               description: "Front View | Number:- 28-01-065-02165",                               url: "https://dl.dropboxusercontent.com/s/isx1t8tpvnp5pwxxalze1/front.jpg?rlkey=9143n6wfcgw359zvjzwicz8ol&dl=1" },
+  { id: 2,  name: "Citizenship",               description: "Back View | Issued Date:- 2065-04-15",                                url: "https://dl.dropboxusercontent.com/s/e6qkt0zcie9hcgg0m73hd/citizenship_back.jpg?rlkey=q6ch49fuq3mk5uxk7vxrtni4h&dl=1" },
+  { id: 3,  name: "Marriage Certificate",      description: "Number:- 2047081401787-2044101901409-4",                              url: "https://dl.dropboxusercontent.com/scl/fi/zga55hrs7hkepwl5sgulf/marriage-certificate.jpg?rlkey=be9kbc9dw6zt3vbb2mrpxua0m&dl=1" },
+  { id: 4,  name: "Global IME Bank",           description: "QR | A/C Number:- 08807010006081",                                    url: "https://dl.dropboxusercontent.com/scl/fi/44hju075jh0dg4xdmmmvz/QR_GBIME.jpg?rlkey=k45hxnfnvyw16y8k3hopjg6oh&dl=1" },
+  { id: 5,  name: "Anil- Sunrise Laxmi Bank",  description: "QR | A/C Number:- 00710124352018",                                   url: "https://dl.dropboxusercontent.com/scl/fi/b3dikb5tlezgwb36jqtis/QR_sunrise.jpg?rlkey=92pzxoh9pfrfb9ywxmzk0mul5&dl=1" },
+  { id: 6,  name: "Cow Milk",                  description: "QR-Esewa | 9766886536",                                               url: "https://dl.dropboxusercontent.com/scl/fi/dzg6eooicwqchwsixbjgg/cwmlk.jpg?rlkey=lerjexquhcvcdv4vmlzwepl7z&dl=1" },
+  { id: 7,  name: "Driving License",           description: "Number:- 01-06-01003951",                                             url: "https://dl.dropboxusercontent.com/scl/fi/0wbi0ax1xbjeudc65gyxd/License.png?rlkey=zb6zpuyy3mb3k6oq6wxsrs2ef&dl=1" },
+  { id: 8,  name: "National ID Card",          description: "Number:- 746-461-485-4",                                              url: "https://dl.dropboxusercontent.com/scl/fi/4gttwoe6pp5a55kyjkho8/National_ID.jpg?rlkey=n6vwlpgkob9tj8uucq3k14t7a&dl=1" },
+  { id: 9,  name: "Passport",                  description: "Number:- 09954740",                                                   url: "https://dl.dropboxusercontent.com/scl/fi/3bxhec2x40st1k0za0bnr/passport.jpg?rlkey=xcah5s9vfrsndfv683fx5z56j&dl=1" },
+  { id: 10, name: "Anil-Votercard",            description: "Number:- 5704456",                                                    url: "https://www.dropbox.com/scl/fi/kyvbw1s9m2p2lqrntkro6/anil_voter-card.png?rlkey=bzzd7bd8740z3lm4zk7vovgm3&dl=1" },
+  { id: 11, name: "Nabil Bank",                description: "CC Number:- 4511 3200 0458 1100 | A/C Number:- 18310017512622",       url: "https://dl.dropboxusercontent.com/scl/fi/xrqj55qqr2bj7hxs8avhq/Nabil_cc.jpg?rlkey=7t8pqdiduy5joc7hdbqf6tfoc&dl=1" },
+  { id: 12, name: "Rastriya Banijya Bank",     description: "Fixed Deposit Receipt",                                               url: "https://www.dropbox.com/scl/fi/adk0mektdqkn3puq6i71i/Rastriya-Banijya-Bank_Fixed-Deposit-Receipt.jpg?rlkey=flk3qnb4lwmdjaor76yanz0fg&st=aya2tt0w&dl=1" },
+  { id: 13, name: "PAN Card",                  description: "Number:- 111677845",                                                  url: "https://dl.dropboxusercontent.com/scl/fi/psru6ppmg6b5t47otamyl/PAN-Card.jpg?rlkey=q437hbz2zz4mwxijfpwnymkz9&dl=1" },
+  { id: 14, name: "Sunil-Laxmi Sunrise Bank",  description: "QR | A/C Number:- 00710103473017",                                   url: "https://www.dropbox.com/scl/fi/ft5qep5tosojxyehu9hyk/Sunil_Laxmi-Sunrise_QR.jpg?rlkey=n34bguuswdi9mlmzvfntifolp&dl=1" },
+  { id: 15, name: "Asthalin",                  description: "inhaler | 100mcg/dose",                                               url: "https://www.dropbox.com/scl/fi/hzdf288sexinzk1u89dxn/asthalin.jpg?rlkey=u3a6qmigfv3pyf95icff5fg6b&dl=1" },
+  { id: 16, name: "Asthalin-Cover",            description: "inhaler | 100mcg/dose",                                               url: "https://www.dropboxusercontent.com/scl/fi/x97xg8z8dltn486nh69a4/asthalin_cover.jpg?rlkey=1tml8kgcx8397ru1t3ga66h50&dl=1" },
+  { id: 17, name: "Budecort",                  description: "inhaler | 200mcg/dose",                                               url: "https://www.dropboxusercontent.com/scl/fi/3oxdq191ervpvp11x629h/budecort.jpg?rlkey=kqi0gj45ve5oadh8e0vtookgo&dl=1" },
+  { id: 18, name: "Budecort-Cover",            description: "inhaler | 200mcg/dose",                                               url: "https://www.dropboxusercontent.com/scl/fi/gpy86jaqhctu4c5c9iy2a/budecort_cover.jpg?rlkey=rr2j5lucq0f78avflt4atm9di&dl=1" },
+  { id: 19, name: "Rastriya Banijya Bank",     description: "Fixed Deposit Form",                                                  url: "https://www.dropbox.com/scl/fi/21656quk9seugtiamk9yf/RBB_deposit-form.jpeg?rlkey=soxvw8aizk47zsd6xweup6dsm&dl=1" },
+  { id: 20, name: "Sangita-Votercard",         description: "Number:- 093838242",                                                  url: "https://www.dropbox.com/scl/fi/pt3641o8v2t3ar6o5g369/Sangita_voter-card.png?rlkey=t8u38l1dpb0qqznmwl6ff5dbe&dl=1" },
+  { id: 21, name: "Mina Parlour Fonepay",      description: "QR | Fonepay",                                                        url: "https://www.dropbox.com/scl/fi/0maw5od1sgfhnl6bmyoyk/Mina_Parlour_QR.jpg?rlkey=yihpv1maitrchxbay7mooto6y&dl=1" },
+  { id: 22, name: "NID Registration",          description: "Registration No:- 9345322240134220",                                  url: "https://www.dropbox.com/scl/fi/76f7c2te53y53cekdxujv/nid_regist.jpg?rlkey=uit3p3d0y1lhzeaof44nk32nr&st=8zg7w1nz&dl=1" },
+  { id: 23, name: "Mero Share | Anil",         description: "BOID No:- 1301070000526221",                                          url: "https://www.dropbox.com/scl/fi/i07hg2ner5qrq2t4csuo0/meroshare_anil.png?rlkey=af7tqw26sol5124dgthfpnx5e&st=7oopn2jv&dl=1" },
+  { id: 24, name: "Mero Share | Sachika",      description: "BOID No:- 1301240001574896",                                          url: "https://www.dropbox.com/scl/fi/n7m6zc6bolngn6cxlol1c/meroshare_sachika.png?rlkey=ud1l6ae3t81d6z4xyqm5aqc9p&st=hsg7d2jz&dl=1" },
+  { id: 25, name: "KUKL",                      description: "Area No.:- 07-03-12 | Customer No:- 1118036130 | Branch:- LALITPUR | Connection No.:- 512", url: "https://www.dropbox.com/scl/fi/ieddtbus6cq7qi8twwr0w/KUKL.jpg?rlkey=8kl7hdjdeqsvxk6cgvdnam4ri&st=7uzj9zdw&dl=1" }
+];
+
+function getDocTag(name) {
+  const n = name.toLowerCase();
+  if (n.includes('bank') || n.includes('nabil') || n.includes('global') || n.includes('sunrise') || n.includes('banijya') || n.includes('mero share') || n.includes('kukl')) return 'Finance';
+  if (n.includes('citizen') || n.includes('passport') || n.includes('national id') || n.includes('pan') || n.includes('nid') || n.includes('voter') || n.includes('license') || n.includes('marriage')) return 'Identity';
+  if (n.includes('milk') || n.includes('parlour') || n.includes('fonepay') || n.includes('esewa') || n.includes('qr')) return 'QR / Payment';
+  if (n.includes('asthalin') || n.includes('budecort')) return 'Medical';
+  return 'Document';
+}
+
+const docGrid = document.getElementById('docGrid');
+const docCount = document.getElementById('docCount');
+const docSearchInput = document.getElementById('docSearchInput');
+const docClearBtn = document.getElementById('docClearBtn');
+const docLoading = document.getElementById('docLoading');
+const docEmpty = document.getElementById('docEmpty');
+const docChips = document.getElementById('docChips');
+let currentDocCat = 'all';
+
+function renderDocs(items, term = '') {
+  docGrid.innerHTML = '';
+  docEmpty.classList.add('d-none');
+  if (!items.length) {
+    docCount.innerHTML = '';
+    docEmpty.classList.remove('d-none');
+    return;
+  }
+  docCount.innerHTML = term
+    ? `<span>${items.length}</span> result${items.length !== 1 ? 's' : ''} for "${term}"`
+    : `Showing all <span>${items.length}</span> documents`;
+  items.forEach(doc => {
+    const card = document.createElement('div');
+    card.className = 'doc-card';
+    card.innerHTML = `
+      <div class="doc-card-img" style="background-image:url('${doc.url}')">
+        <span class="doc-card-tag">${getDocTag(doc.name)}</span>
+      </div>
+      <div class="doc-card-body">
+        <h4>${doc.name}</h4>
+        <p>${doc.description}</p>
+      </div>
+    `;
+    card.addEventListener('click', () => openDocModal(doc));
+    docGrid.appendChild(card);
+  });
+}
+
+function filterDocs() {
+  const term = docSearchInput.value.toLowerCase().trim();
+  docClearBtn.classList.toggle('show', term.length > 0);
+  let filtered = docData;
+  if (currentDocCat !== 'all') {
+    filtered = filtered.filter(d => getDocTag(d.name) === currentDocCat);
+  }
+  if (term) {
+    filtered = filtered.filter(d =>
+      d.name.toLowerCase().includes(term) ||
+      d.description.toLowerCase().includes(term)
+    );
+  }
+  renderDocs(filtered, term);
+}
+
+docSearchInput.addEventListener('input', filterDocs);
+docClearBtn.addEventListener('click', () => {
+  docSearchInput.value = '';
+  docClearBtn.classList.remove('show');
+  filterDocs();
+});
+docChips.querySelectorAll('.doc-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    docChips.querySelectorAll('.doc-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    currentDocCat = chip.dataset.cat;
+    filterDocs();
+  });
+});
+
+// Initial render
+filterDocs();
+
+// Doc Modal
+const docModalOverlay = document.getElementById('docModalOverlay');
+const docModalTitle = document.getElementById('docModalTitle');
+const docModalImg = document.getElementById('docModalImg');
+const docModalDesc = document.getElementById('docModalDesc');
+const docModalDownload = document.getElementById('docModalDownload');
+const docModalClose = document.getElementById('docModalClose');
+
+function openDocModal(doc) {
+  docModalTitle.textContent = doc.name;
+  docModalImg.src = doc.url;
+  docModalImg.alt = doc.name;
+  docModalDesc.textContent = doc.description;
+  const filename = doc.url.split('/').pop().split('?')[0] || doc.name.replace(/\s+/g, '-') + '.jpg';
+  docModalDownload.href = doc.url;
+  docModalDownload.download = filename;
+  docModalOverlay.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeDocModal() {
+  docModalOverlay.classList.remove('show');
+  document.body.style.overflow = '';
+}
+docModalClose.addEventListener('click', closeDocModal);
+docModalOverlay.addEventListener('click', (e) => {
+  if (e.target === docModalOverlay) closeDocModal();
+});
+
+// ========== PWA INSTALL ==========
+let deferredPrompt = null;
+const installBtn = document.getElementById('installBtn');
+const installBannerContainer = document.getElementById('installBannerContainer');
+const installSettings = document.getElementById('installSettings');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'flex';
+  showInstallBanner();
+});
+
+function showInstallBanner() {
+  if (!deferredPrompt) return;
+  installBannerContainer.innerHTML = `
+    <div class="install-banner">
+      <i class="bi bi-phone"></i>
+      <div class="install-banner-content">
+        <h4>Install Mero App</h4>
+        <p>Quick access from home screen</p>
+      </div>
+      <button class="install-btn" id="bannerInstallBtn">Install</button>
+    </div>
+  `;
+  document.getElementById('bannerInstallBtn').addEventListener('click', triggerInstall);
+}
+
+async function triggerInstall() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    installBtn.style.display = 'none';
+    installBannerContainer.innerHTML = '';
+  }
+  deferredPrompt = null;
+}
+
+installBtn.addEventListener('click', triggerInstall);
+installSettings.addEventListener('click', () => {
+  if (deferredPrompt) triggerInstall();
+  else alert('App already installed or not supported on this browser.');
+});
+
+// ========== SERVICE WORKER ==========
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW failed:', err));
+  });
+}
+</script>
+</body>
+</html>
